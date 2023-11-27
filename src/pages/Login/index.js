@@ -52,6 +52,7 @@ export default function Login() {
       .login(data)
       .then(response => {
         try {
+          // return console.log(response.data);
           // navigation.navigate('Home'); // Navega para a tela 'Home'
           navigation.reset({
             index: 0,

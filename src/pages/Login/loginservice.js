@@ -32,9 +32,12 @@ class LoginService {
       headers: Config.HEADER_REQUEST,
     })
       .then(response => {
-        //console.log(response.data.token);
+        //console.log(response.data.dados);
         AsyncStorage.setItem('TOKEN', response.data.token);
         AsyncStorage.setItem('EMAIL', response.data.dados.email);
+        AsyncStorage.setItem('ADMIN', response.data.dados.admin);
+        let meuId = response.data.dados.id.toString();
+        AsyncStorage.setItem('ID', meuId);
         //console.log(response.data.dados.email);
         return Promise.resolve(response);
       })

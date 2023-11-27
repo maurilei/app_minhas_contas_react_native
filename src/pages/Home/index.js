@@ -17,6 +17,7 @@ import React, {useEffect, useState} from 'react';
 import {Picker} from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Modal from 'react-native-modal';
 import Share from 'react-native-share';
 import homeService from './homeservice';
 
@@ -32,6 +33,12 @@ export default function Home() {
   const [somaValorMes, setSomaValorMes] = useState();
   const [somaValorPagoMes, setSomaValorPagoMes] = useState();
   const [somaValorNaoPagoMes, setSomaValorNaoPagoMes] = useState();
+  const [adm, setAdm] = useState();
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
 
   //converter mes de numero para mes escrito
   const convertMes = async m => {
@@ -290,13 +297,26 @@ export default function Home() {
       });
   };
 
+  const isAdm = async () => {
+    const value = await AsyncStorage.getItem('ADMIN');
+    if (value === 'admin') {
+      setAdm(true);
+    }
+    if (value === 'user') {
+      setAdm(false);
+    }
+
+    //console.log(adm);
+  };
   //executar funcoes ao abrir tela
   useEffect(() => {
+    isAdm();
     buscarContasMes();
     somarContasMes();
     somarContasPagasMes();
     somarContasNaoPagasMes();
     convertMes();
+    //console.log(adm);
   }, []);
 
   //navegar para pagina adicionar conta
@@ -306,6 +326,11 @@ export default function Home() {
       index: 0,
       routes: [{name: 'ADD'}],
     });*/
+  };
+
+  //navegar para pagina  pageUsuarios
+  const pageUsuarios = () => {
+    navigation.navigate('Usuarios');
   };
 
   //navegar para pagina editar conta enviando os dados
@@ -397,11 +422,44 @@ export default function Home() {
     }
   };
 
+  const sair = async () => {
+    toggleModal();
+
+    await await AsyncStorage.removeItem('TOKEN');
+    navigation.reset({
+      index: 0,
+      routes: [{name: 'Login'}],
+    });
+  };
+
   return (
     <View style={styles.container}>
-      {/*<View style={styles.topbar}>
-        <Text style={styles.textTopBar}>MINHAS CONTAS</Text>
-  </View>*/}
+      <Modal isVisible={isModalVisible}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalText}>
+            Você tem certeza que deseja Sair?
+          </Text>
+          <TouchableOpacity onPress={sair}>
+            <Text style={styles.modalButtonSim}>Sim</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={toggleModal}>
+            <Text style={styles.modalButtonCancel}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+      <View style={styles.topbar}>
+        {adm && (
+          <TouchableOpacity style={styles.settings} onPress={pageUsuarios}>
+            <Icon name="user" size={30} color="#000000" />
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity style={styles.settings}>
+          <Icon name="cog" size={30} color="#000000" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.settings} onPress={toggleModal}>
+          <Icon name="times-circle" size={30} color="#ff0000" />
+        </TouchableOpacity>
+      </View>
       <View style={styles.totais}>
         <Text style={styles.textTotais}>TOTAL NO MÊS DE {mesConvertido}</Text>
         <Text style={styles.textTotais}>R$ {somaValorMes}</Text>
@@ -522,12 +580,6 @@ export default function Home() {
         <Text style={styles.textBtnAdd}>Buscar</Text>
       </TouchableOpacity>
 
-      {/* <TouchableOpacity
-        style={styles.btnAddConta}
-        onPress={() => shareAllDataOnWhatsApp()}>
-        <Text style={styles.textBtnAdd}>Compartilhar</Text>
-      </TouchableOpacity>*/}
-
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -579,9 +631,6 @@ export default function Home() {
                           <View
                             style={{
                               flexDirection: 'row',
-                              // width: '90%',
-                              // marginTop: 20,
-                              //justifyContent: 'center',
                               alignItems: 'center',
                             }}>
                             <View
@@ -589,10 +638,7 @@ export default function Home() {
                                 alignContent: 'center',
                                 justifyContent: 'center',
                                 alignSelf: 'center',
-                                //position: 'relative',
                                 left: '-30%',
-                                // backgroundColor: '#fff',
-                                //width: 30,
                               }}
                             />
                             <View>
@@ -684,20 +730,22 @@ const styles = StyleSheet.create({
   },
 
   topbar: {
+    flexDirection: 'row',
+    //flex: 1,
     marginTop: 10,
-    width: '90%',
+    width: '100%',
     height: 50,
     backgroundColor: '#fff',
-    borderRadius: 10,
-    alignContent: 'center',
-    alignItems: 'center',
+    //borderRadius: 10,
+    alignContent: 'flex-end',
+    alignItems: 'flex-end',
     padding: 10,
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
   },
-  textTopBar: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 18,
+  settings: {
+    //position: 'relative',
+    right: 10,
+    marginHorizontal: 10,
   },
   totais: {
     marginTop: 10,
@@ -799,5 +847,46 @@ const styles = StyleSheet.create({
   situacao: {
     fontSize: 19,
     color: '#fff',
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'blue',
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    padding: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    //alignSelf: 'center',
+    borderRadius: 4,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  modalText: {
+    marginBottom: 10,
+    fontSize: 18,
+    color: '#000',
+    fontWeight: 'bold',
+  },
+  modalButtonSim: {
+    marginTop: 10,
+    fontSize: 18,
+    color: '#ffffff',
+    backgroundColor: '#940000',
+    width: 100,
+    height: 30,
+    textAlign: 'center',
+    borderRadius: 10,
+  },
+  modalButtonCancel: {
+    marginTop: 10,
+    fontSize: 18,
+    color: '#ffffff',
+    backgroundColor: '#04320e',
+    width: 100,
+    height: 40,
+    textAlign: 'center',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
