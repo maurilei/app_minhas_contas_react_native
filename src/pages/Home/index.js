@@ -604,6 +604,11 @@ export default function Home() {
                 item.vencimento === moment(date).format('YYYY-MM-DD')
                   ? styles.cadaItemVenceHoje
                   : '';
+              const vencidoStyle =
+                item.situacao === 'Pendente' &&
+                item.vencimento < moment(date).format('YYYY-MM-DD')
+                  ? styles.cadaItemVencido
+                  : '';
               return (
                 <SafeAreaView>
                   <ScrollView
@@ -616,7 +621,7 @@ export default function Home() {
                     }}>
                     <View style={styles.listaItens}>
                       <TouchableOpacity
-                        style={[itemStyle, vencimentoStyle]}
+                        style={[itemStyle, vencimentoStyle, vencidoStyle]}
                         onPress={() =>
                           editarConta(
                             item.id,
@@ -825,6 +830,16 @@ const styles = StyleSheet.create({
     width: '100%',
     //height: 90,
     backgroundColor: '#fc6005',
+    borderRadius: 10,
+    padding: 5,
+    marginTop: 10,
+  },
+  cadaItemVencido: {
+    textAlign: 'center',
+    alignItems: 'center',
+    width: '100%',
+    //height: 90,
+    backgroundColor: '#fc0505',
     borderRadius: 10,
     padding: 5,
     marginTop: 10,

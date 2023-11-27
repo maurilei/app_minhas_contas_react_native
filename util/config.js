@@ -1,5 +1,5 @@
 const Config = {
-  API_URL: '192.168.0.1',
+  API_URL: 'https://apicontas.maurilei.xyz/',
   TIMEOUT_REQUEST: 5000,
   HEADER_REQUEST: {
     Accept: 'application/json',
